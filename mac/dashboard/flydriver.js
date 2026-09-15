@@ -30,9 +30,8 @@
     const g = new THREE.Group();
     const deck = new THREE.Mesh(
       new THREE.BoxGeometry(1.55, 0.05, 2.35),
-      new THREE.MeshPhysicalMaterial({
-        color: 0xdde8f2, transparent: true, opacity: 0.38,
-        roughness: 0.15, metalness: 0.05, transmission: 0.55, thickness: 0.2,
+      new THREE.MeshPhongMaterial({
+        color: 0xc5d4e0, transparent: true, opacity: 0.45, shininess: 90,
       })
     );
     deck.position.y = 0.32;
@@ -45,23 +44,24 @@
     sw.position.set(0.22, 0.64, 0.28);
     g.add(sw);
 
+    // +Z is forward: yellow drive wheels at the nose, small caster at the tail.
     const caster = new THREE.Mesh(new THREE.SphereGeometry(0.1, 16, 12), mat(0xc0c4ca, { metalness: 0.7, roughness: 0.25 }));
-    caster.position.set(0, 0.1, 0.92);
+    caster.position.set(0, 0.1, -0.92);
     g.add(caster);
     const fork = new THREE.Mesh(new THREE.CylinderGeometry(0.025, 0.025, 0.22, 8), mat(0xb8bcc2, { metalness: 0.6 }));
-    fork.position.set(0, 0.22, 0.92);
+    fork.position.set(0, 0.22, -0.92);
     g.add(fork);
 
     const motorL = new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.18, 0.42), mat(0xf0c000));
-    motorL.position.set(-0.58, 0.22, -0.72);
+    motorL.position.set(-0.58, 0.22, 0.72);
     const motorR = motorL.clone();
     motorR.position.x = 0.58;
     g.add(motorL, motorR);
 
     const wL = wheel();
-    wL.position.set(-0.78, 0.28, -0.72);
+    wL.position.set(-0.78, 0.28, 0.72);
     const wR = wheel();
-    wR.position.set(0.78, 0.28, -0.72);
+    wR.position.set(0.78, 0.28, 0.72);
     g.add(wL, wR);
     HOLD.wheels = [wL, wR];
 
@@ -117,8 +117,8 @@
     HOLD.head = head;
 
     const wingGeo = new THREE.PlaneGeometry(0.42, 0.18);
-    const wingMat = new THREE.MeshPhysicalMaterial({
-      color: 0xcfe8ff, transparent: true, opacity: 0.35, side: THREE.DoubleSide, roughness: 0.2,
+    const wingMat = new THREE.MeshPhongMaterial({
+      color: 0xcfe8ff, transparent: true, opacity: 0.35, side: THREE.DoubleSide,
     });
     const wingL = new THREE.Mesh(wingGeo, wingMat);
     wingL.position.set(-0.22, 0.28, -0.02);
@@ -160,17 +160,20 @@
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     el.appendChild(renderer.domElement);
 
-    scene.add(new THREE.AmbientLight(0xffffff, 0.45));
-    const key = new THREE.DirectionalLight(0xfff2d0, 1.1);
-    key.position.set(3, 5, 2);
+    scene.add(new THREE.AmbientLight(0xffffff, 0.85));
+    const key = new THREE.DirectionalLight(0xfff6e0, 1.35);
+    key.position.set(3, 6, 4);
     scene.add(key);
-    const fill = new THREE.DirectionalLight(0x88aacc, 0.35);
-    fill.position.set(-3, 1, -2);
+    const fill = new THREE.DirectionalLight(0xa8c4e8, 0.55);
+    fill.position.set(-4, 2, -2);
     scene.add(fill);
+    const rim = new THREE.PointLight(0xf5c542, 0.55, 8);
+    rim.position.set(0, 1.4, 0.4);
+    scene.add(rim);
 
     const floor = new THREE.Mesh(
       new THREE.CircleGeometry(4, 32),
-      mat(0x12161e, { roughness: 1 })
+      mat(0x2a3140, { roughness: 1 })
     );
     floor.rotation.x = -Math.PI / 2;
     scene.add(floor);

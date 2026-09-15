@@ -1,7 +1,7 @@
 /*
   Fly Brain Robot — Arduino Uno / Nano firmware
 
-  Sequential HC-SR04 (front/left/right) + L298N differential drive.
+  Sequential HC-SR04 (front/left/right) + L293D differential drive.
   USB serial 115200 to Raspberry Pi.
 
   Protocol:
@@ -20,12 +20,12 @@ const int ECHO_LEFT = 5;
 const int TRIG_RIGHT = 6;
 const int ECHO_RIGHT = 11;
 
-const int ENA = 9;   // left PWM
-const int IN1 = 8;
-const int IN2 = 7;
-const int ENB = 10;  // right PWM
-const int IN3 = 12;
-const int IN4 = 13;
+const int ENA = 9;   // L293D EN1, left PWM
+const int IN1 = 8;   // L293D IN1
+const int IN2 = 7;   // L293D IN2
+const int ENB = 10;  // L293D EN2, right PWM
+const int IN3 = 12;  // L293D IN3
+const int IN4 = 13;  // L293D IN4
 
 const unsigned long PING_TIMEOUT_US = 20000UL;  // ~340 cm max; miss -> -1
 const unsigned long WATCHDOG_MS = 200;
