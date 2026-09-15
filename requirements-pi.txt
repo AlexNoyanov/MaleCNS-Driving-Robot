@@ -1,0 +1,6 @@
+# Fly Brain Robot — Raspberry Pi 4
+pyserial>=3.5
+websockets>=12.0
+pillow>=10.0
+# picamera2 is installed via apt on Raspberry Pi OS Bookworm:
+#   sudo apt install python3-picamera2 python3-serial

@@ -26,6 +26,8 @@ IMPORTANT CONTEXT (read before running):
   and adjust -- I couldn't test this against the live API from here.
 """
 
+import os
+
 import numpy as np
 import torch
 import matplotlib.pyplot as plt
@@ -35,7 +37,12 @@ from neuprint import Client, fetch_adjacencies, NeuronCriteria as NC
 # 1. CONNECT + PULL CONNECTIVITY
 # ---------------------------------------------------------------------------
 
-TOKEN = "c678c3b8ed058bc611a139d1b62119c467b3fb833018608e7f2d3b06c0ac9883"  # neuprint.janelia.org -> Account -> Auth Token
+TOKEN = os.environ.get("NEUPRINT_TOKEN")
+if not TOKEN:
+    raise RuntimeError(
+        "This legacy script always hits neuPrint. Prefer: python -m mac.server "
+        "(uses connectome_cache.npz, no token). To fetch anyway: export NEUPRINT_TOKEN=..."
+    )
 client = Client("https://neuprint.janelia.org", dataset="male-cns:v1.0", token=TOKEN)
 
 # Start small and specific. The full CNS is ~166,700 neurons / ~125M

@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>MaleCNS Fly Brain Robot</title>
+  <link rel="stylesheet" href="/static/style.css" />
+  <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+</head>
+<body>
+  <header class="top">
+    <div class="brand">
+      <div class="mark"></div>
+      <div>
+        <h1>MaleCNS Fly Brain Robot</h1>
+        <p class="sub">Local <code>male-cns:v1.0</code> LIF · 2WD · live connectome</p>
+      </div>
+    </div>
+    <div class="pills" id="pills">
+      <span class="pill" data-k="brain">Brain</span>
+      <span class="pill" data-k="wifi">Wi-Fi</span>
+      <span class="pill" data-k="serial">Serial</span>
+      <span class="pill" data-k="camera">Camera</span>
+    </div>
+    <div class="modes" id="modes">
+      <button data-mode="hybrid" class="active">Hybrid</button>
+      <button data-mode="brain">Brain</button>
+      <button data-mode="manual">Manual</button>
+    </div>
+  </header>
+
+  <main class="grid">
+    <section class="panel">
+      <h2>Camera</h2>
+      <div class="cam-wrap">
+        <img id="cam" alt="Robot camera" src="/camera/stream" />
+        <div class="cam-meta" id="cam-meta">waiting for Pi…</div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>Fruit-fly CNS activity</h2>
+      <div id="brain3d"></div>
+      <p class="hint" id="geom-hint">Local geometry · no neuPrint token</p>
+    </section>
+
+    <section class="panel gauges">
+      <h2>Sensors & motors</h2>
+      <div class="bars">
+        <div class="bar-row"><span>Left</span><div class="bar"><i id="bar-l"></i></div><b id="txt-l">—</b></div>
+        <div class="bar-row"><span>Front</span><div class="bar"><i id="bar-f"></i></div><b id="txt-f">—</b></div>
+        <div class="bar-row"><span>Right</span><div class="bar"><i id="bar-r"></i></div><b id="txt-r">—</b></div>
+      </div>
+      <div class="wheels">
+        <div>
+          <label>Left wheel</label>
+          <meter id="m-l" min="-255" max="255" value="0"></meter>
+          <span id="pwm-l">0</span>
+        </div>
+        <div>
+          <label>Right wheel</label>
+          <meter id="m-r" min="-255" max="255" value="0"></meter>
+          <span id="pwm-r">0</span>
+        </div>
+      </div>
+      <div class="emergency" id="emergency">EMERGENCY REFLEX</div>
+      <div class="manual" id="manual-box">
+        <p>Manual PWM</p>
+        <input type="range" id="sl-l" min="-255" max="255" value="0" />
+        <input type="range" id="sl-r" min="-255" max="255" value="0" />
+        <button type="button" id="stop">Stop</button>
+      </div>
+      <dl class="stats">
+        <div><dt>Sim</dt><dd id="st-hz">— Hz</dd></div>
+        <div><dt>Neurons</dt><dd id="st-n">—</dd></div>
+        <div><dt>Synapses</dt><dd id="st-syn">—</dd></div>
+        <div><dt>Spike p</dt><dd id="st-spk">—</dd></div>
+        <div><dt>Packet age</dt><dd id="st-age">—</dd></div>
+        <div><dt>RSSI</dt><dd id="st-rssi">—</dd></div>
+      </dl>
+    </section>
+
+    <section class="panel raster-panel">
+      <h2>Spike raster <span id="mode-tag"></span></h2>
+      <canvas id="raster" width="1200" height="220"></canvas>
+    </section>
+  </main>
+  <script src="/static/app.js"></script>
+</body>
+</html>
