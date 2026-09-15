@@ -1,4 +1,11 @@
-"""Fly Brain Robot
+# MaleCNS Fly Brain driving two-wheeled Robot project
+<img width="618" height="409" alt="Screenshot 2026-09-15 at 22 37 58" src="https://github.com/user-attachments/assets/2d9a8ef0-f298-49c9-a2aa-4406d33785ef" />
+
+
+
+## Making Fruit Fly brain model to drive a bot in real life, getting video from camera, distances from ultrasonic sensors  
+<img width="800" height="449" alt="ezgif com-video-to-gif-converter" src="https://github.com/user-attachments/assets/88699a0c-5c37-47d6-91ce-a8032cab439f" />
+
 
 Arduino (motors + 3× HC-SR04) ↔ Raspberry Pi 4 (camera + Wi-Fi) ↔ Mac M1
 (local MaleCNS LIF brain + live dashboard).
@@ -6,6 +13,7 @@ Arduino (motors + 3× HC-SR04) ↔ Raspberry Pi 4 (camera + Wi-Fi) ↔ Mac M1
 The connectome in `connectome_cache.npz` / `data/connectome_cache.npz` is a
 real `male-cns:v1.0` subset (AL(R), ~4057 neurons). After that file exists,
 **no neuPrint token is required**.
+
 
 ## 1. Wire the robot
 
