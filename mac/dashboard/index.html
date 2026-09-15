@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>MaleCNS Fly Brain Robot</title>
   <link rel="stylesheet" href="/static/style.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
 </head>
 <body>
@@ -13,7 +14,7 @@
       <div class="mark"></div>
       <div>
         <h1>MaleCNS Fly Brain Robot</h1>
-        <p class="sub">Local <code>male-cns:v1.0</code> LIF · 2WD · live connectome</p>
+        <p class="sub">Local <code>male-cns:v1.0</code> LIF · 2WD acrylic chassis · live connectome</p>
       </div>
     </div>
     <div class="pills" id="pills">
@@ -30,18 +31,10 @@
   </header>
 
   <main class="grid">
-    <section class="panel">
-      <h2>Camera</h2>
-      <div class="cam-wrap">
-        <img id="cam" alt="Robot camera" src="/camera/stream" />
-        <div class="cam-meta" id="cam-meta">waiting for Pi…</div>
-      </div>
-    </section>
-
-    <section class="panel">
-      <h2>Fruit-fly CNS activity</h2>
-      <div id="brain3d"></div>
-      <p class="hint" id="geom-hint">Local geometry · no neuPrint token</p>
+    <section class="panel pilot-panel">
+      <h2>Pilot — fruit fly on the chassis</h2>
+      <div id="fly-driver"></div>
+      <p class="hint" id="pilot-caption">Idle · waiting for drive</p>
     </section>
 
     <section class="panel gauges">
@@ -80,11 +73,26 @@
       </dl>
     </section>
 
+    <section class="panel">
+      <h2>Camera</h2>
+      <div class="cam-wrap">
+        <img id="cam" alt="Robot camera" src="/camera/stream" />
+        <div class="cam-meta" id="cam-meta">waiting for Pi…</div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>Fruit-fly CNS activity</h2>
+      <div id="brain3d"></div>
+      <p class="hint" id="geom-hint">Local geometry · no neuPrint token</p>
+    </section>
+
     <section class="panel raster-panel">
       <h2>Spike raster <span id="mode-tag"></span></h2>
       <canvas id="raster" width="1200" height="220"></canvas>
     </section>
   </main>
+  <script src="/static/flydriver.js"></script>
   <script src="/static/app.js"></script>
 </body>
 </html>

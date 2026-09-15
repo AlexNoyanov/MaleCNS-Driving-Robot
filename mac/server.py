@@ -291,23 +291,24 @@ async def control_loop() -> None:
         spikes = brain.step(ext)
         left_rate, right_rate = brain.readout(spikes)
 
-        if robot_on:
-            left_pwm, right_pwm, emergency = hybrid_command(
-                front,
-                left,
-                right,
-                left_rate,
-                right_rate,
-                vis_l,
-                vis_f,
-                vis_r,
-                mode=mode,
-                manual_left=state["manual_left"],
-                manual_right=state["manual_right"],
-                telemetry_age_s=telem_age,
-            )
-        else:
-            left_pwm, right_pwm, emergency = 0, 0, False
+        left_pwm, right_pwm, emergency = hybrid_command(
+            front,
+            left,
+            right,
+            left_rate,
+            right_rate,
+            vis_l,
+            vis_f,
+            vis_r,
+            mode=mode,
+            manual_left=state["manual_left"],
+            manual_right=state["manual_right"],
+            telemetry_age_s=telem_age,
+        )
+        send_left, send_right = left_pwm, right_pwm
+        if not robot_on:
+            # Idle demo still animates the fly pilot; never command hardware.
+            send_left, send_right = 0, 0
 
         row = brain.raster_row(spikes)
         raster.append(row)
@@ -337,7 +338,7 @@ async def control_loop() -> None:
         ws = robot_ws
         if ws is not None:
             try:
-                await ws.send_json({"type": "motors", "left": left_pwm, "right": right_pwm})
+                await ws.send_json({"type": "motors", "left": send_left, "right": send_right})
             except Exception:
                 pass
 

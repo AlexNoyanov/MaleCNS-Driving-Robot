@@ -126,6 +126,7 @@ function applyState(s) {
   if (brainReady && s.activity && s.activity.length) {
     Plotly.restyle("brain3d", { "marker.color": [s.activity] }, [1]);
   }
+  if (window.updateFlyDriver) window.updateFlyDriver(s.left_pwm, s.right_pwm);
 }
 
 function connect() {
@@ -167,3 +168,6 @@ document.getElementById("stop").addEventListener("click", () => {
 });
 
 init().then(connect);
+if (window.initFlyDriver) {
+  window.initFlyDriver(document.getElementById("fly-driver"));
+}

@@ -36,11 +36,15 @@ html, body { margin: 0; background: var(--bg); color: var(--ink); font: 14px/1.4
 .modes button.active { color: #111; background: var(--gold); border-color: var(--gold); font-weight: 600; }
 .grid {
   display: grid;
-  grid-template-columns: 1.1fr 1.3fr 0.9fr;
-  grid-template-rows: minmax(360px, 1fr) 260px;
+  grid-template-columns: 1.15fr 1.15fr 0.95fr;
+  grid-template-rows: minmax(300px, 1.15fr) minmax(220px, 0.85fr) 220px;
   gap: 12px; padding: 12px;
   height: calc(100vh - 78px);
 }
+.pilot-panel { grid-column: 1 / 3; }
+.gauges { grid-column: 3; grid-row: 1 / 3; }
+#fly-driver { flex: 1; min-height: 260px; border-radius: 8px; overflow: hidden; background: #07080c; }
+#fly-driver canvas { width: 100%; height: 100%; display: block; }
 .panel {
   background: var(--panel); border: 1px solid var(--line); border-radius: 12px;
   padding: 12px 14px; min-height: 0; display: flex; flex-direction: column;
@@ -73,5 +77,7 @@ html, body { margin: 0; background: var(--bg); color: var(--ink); font: 14px/1.4
 #mode-tag { color: var(--gold); text-transform: none; letter-spacing: 0; font-weight: 500; }
 @media (max-width: 1100px) {
   .grid { grid-template-columns: 1fr; grid-template-rows: auto; height: auto; }
-  .raster-panel { grid-column: auto; min-height: 220px; }
+  .pilot-panel, .gauges, .raster-panel { grid-column: auto; grid-row: auto; }
+  #fly-driver { min-height: 320px; }
+  .raster-panel { min-height: 220px; }
 }
