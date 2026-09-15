@@ -149,12 +149,132 @@
     return fly;
   }
 
+  const CM_SCALE = 0.05;
+  const NET_COLS = 19;
+  const NET_ROWS = 6;
+  const WALL_H = 1.55;
+
+  function cmToScene(cm) {
+    if (cm == null || cm < 0) return 6.2;
+    return Math.max(0.55, Math.min(120, Number(cm)) * CM_SCALE);
+  }
+
+  function makeRangeNet() {
+    const group = new THREE.Group();
+    const nVerts = NET_COLS * NET_ROWS;
+    const positions = new Float32Array(nVerts * 3);
+    const geo = new THREE.BufferGeometry();
+    geo.setAttribute("position", new THREE.BufferAttribute(positions, 3));
+    const idx = [];
+    for (let r = 0; r < NET_ROWS; r++) {
+      for (let c = 0; c < NET_COLS - 1; c++) {
+        const a = r * NET_COLS + c;
+        idx.push(a, a + 1);
+      }
+    }
+    for (let c = 0; c < NET_COLS; c++) {
+      for (let r = 0; r < NET_ROWS - 1; r++) {
+        const a = r * NET_COLS + c;
+        idx.push(a, a + NET_COLS);
+      }
+    }
+    geo.setIndex(idx);
+    const lines = new THREE.LineSegments(
+      geo,
+      new THREE.LineBasicMaterial({ color: 0x5ce1c5, transparent: true, opacity: 0.8 })
+    );
+    group.add(lines);
+
+    const fillGeo = new THREE.PlaneGeometry(1, 1, 12, 4);
+    const fillMat = new THREE.MeshBasicMaterial({
+      color: 0x5ce1c5, transparent: true, opacity: 0.08, side: THREE.DoubleSide,
+    });
+    const frontFill = new THREE.Mesh(fillGeo.clone(), fillMat.clone());
+    const leftFill = new THREE.Mesh(fillGeo.clone(), fillMat.clone());
+    const rightFill = new THREE.Mesh(fillGeo.clone(), fillMat.clone());
+    leftFill.rotation.y = Math.PI / 2;
+    rightFill.rotation.y = Math.PI / 2;
+    group.add(frontFill, leftFill, rightFill);
+
+    const rayMat = new THREE.LineBasicMaterial({ color: 0xf5c542, transparent: true, opacity: 0.55 });
+    function ray() {
+      const g = new THREE.BufferGeometry().setFromPoints([
+        new THREE.Vector3(0, 0.35, 0),
+        new THREE.Vector3(0, 0.35, 1),
+      ]);
+      return new THREE.Line(g, rayMat);
+    }
+    const rayF = ray();
+    const rayL = ray();
+    const rayR = ray();
+    group.add(rayF, rayL, rayR);
+
+    HOLD.net = {
+      group, geo, positions, lines,
+      frontFill, leftFill, rightFill,
+      rayF, rayL, rayR,
+    };
+    layoutRangeNet(4, 4, 4);
+    return group;
+  }
+
+  function layoutRangeNet(leftU, frontU, rightU) {
+    if (!HOLD.net) return;
+    const pos = HOLD.net.positions;
+    for (let c = 0; c < NET_COLS; c++) {
+      const t = c / (NET_COLS - 1);
+      const ang = -Math.PI / 2 + t * Math.PI;
+      let d;
+      if (t < 0.5) d = leftU + (frontU - leftU) * (t * 2);
+      else d = frontU + (rightU - frontU) * ((t - 0.5) * 2);
+      const x = Math.sin(ang) * d;
+      const z = Math.cos(ang) * d;
+      for (let r = 0; r < NET_ROWS; r++) {
+        const y = 0.02 + WALL_H * (r / (NET_ROWS - 1));
+        const i = (r * NET_COLS + c) * 3;
+        pos[i] = x;
+        pos[i + 1] = y;
+        pos[i + 2] = z;
+      }
+    }
+    HOLD.net.geo.attributes.position.needsUpdate = true;
+    HOLD.net.geo.computeBoundingSphere();
+
+    const widthF = Math.max(1.2, (leftU + rightU) * 0.55);
+    HOLD.net.frontFill.position.set(0, WALL_H / 2, frontU);
+    HOLD.net.frontFill.scale.set(widthF, WALL_H, 1);
+    HOLD.net.leftFill.position.set(-leftU, WALL_H / 2, 0);
+    HOLD.net.leftFill.scale.set(Math.max(1.2, frontU * 0.9), WALL_H, 1);
+    HOLD.net.rightFill.position.set(rightU, WALL_H / 2, 0);
+    HOLD.net.rightFill.scale.set(Math.max(1.2, frontU * 0.9), WALL_H, 1);
+
+    const near = Math.min(leftU, frontU, rightU);
+    const heat = Math.max(0, Math.min(1, (3.2 - near) / 3.2));
+    const color = new THREE.Color().setHSL(0.48 - heat * 0.48, 0.75, 0.55);
+    HOLD.net.lines.material.color.copy(color);
+    HOLD.net.frontFill.material.color.copy(color);
+    HOLD.net.leftFill.material.color.copy(color);
+    HOLD.net.rightFill.material.color.copy(color);
+    const fade = near > 5.4 ? 0.22 : 0.82;
+    HOLD.net.lines.material.opacity = fade;
+
+    function setRay(line, x, z) {
+      const p = line.geometry.attributes.position.array;
+      p[0] = 0; p[1] = 0.38; p[2] = 0.2;
+      p[3] = x; p[4] = 0.7; p[5] = z;
+      line.geometry.attributes.position.needsUpdate = true;
+    }
+    setRay(HOLD.net.rayF, 0, frontU);
+    setRay(HOLD.net.rayL, -leftU, 0);
+    setRay(HOLD.net.rayR, rightU, 0);
+  }
+
   function initFlyDriver(el) {
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(0x07080c);
     const camera = new THREE.PerspectiveCamera(42, 1, 0.1, 40);
-    camera.position.set(2.4, 1.7, 2.6);
-    camera.lookAt(0, 0.5, 0);
+    camera.position.set(3.6, 2.4, 4.4);
+    camera.lookAt(0, 0.45, 0.2);
 
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
@@ -172,17 +292,21 @@
     scene.add(rim);
 
     const floor = new THREE.Mesh(
-      new THREE.CircleGeometry(4, 32),
+      new THREE.CircleGeometry(10, 48),
       mat(0x2a3140, { roughness: 1 })
     );
     floor.rotation.x = -Math.PI / 2;
     scene.add(floor);
+    const groundNet = new THREE.GridHelper(12, 24, 0x4a5d72, 0x243040);
+    groundNet.position.y = 0.015;
+    scene.add(groundNet);
 
     const rig = new THREE.Group();
     rig.add(makeChassis());
     rig.add(makeFly());
     scene.add(rig);
     HOLD.rig = rig;
+    scene.add(makeRangeNet());
 
     HOLD.drive = 0;
     HOLD.turn = 0;
@@ -190,6 +314,12 @@
     HOLD.look = 0;
     HOLD.gas = 0;
     HOLD.steerAng = 0;
+    HOLD.wallL = 4;
+    HOLD.wallF = 4;
+    HOLD.wallR = 4;
+    HOLD.tgtL = 4;
+    HOLD.tgtF = 4;
+    HOLD.tgtR = 4;
 
     function resize() {
       const w = el.clientWidth || 400;
@@ -228,8 +358,13 @@
       if (HOLD.wheels) {
         HOLD.wheels.forEach((w) => { w.rotation.x = HOLD.spin; });
       }
+      HOLD.wallL += (HOLD.tgtL - HOLD.wallL) * 0.12;
+      HOLD.wallF += (HOLD.tgtF - HOLD.wallF) * 0.12;
+      HOLD.wallR += (HOLD.tgtR - HOLD.wallR) * 0.12;
+      layoutRangeNet(HOLD.wallL, HOLD.wallF, HOLD.wallR);
+
       if (HOLD.rig) {
-        HOLD.rig.rotation.y = Math.sin(t * 0.00025) * 0.15;
+        HOLD.rig.rotation.y = Math.sin(t * 0.00025) * 0.12;
       }
       renderer.render(scene, camera);
       requestAnimationFrame(tick);
@@ -238,17 +373,22 @@
     HOLD.ready = true;
   }
 
-  function updateFlyDriver(leftPwm, rightPwm) {
+  function updateFlyDriver(leftPwm, rightPwm, leftCm, frontCm, rightCm) {
     const l = Number(leftPwm) || 0;
     const r = Number(rightPwm) || 0;
     HOLD.drive = 0.5 * (l + r);
     HOLD.turn = (l - r) / 255;
+    HOLD.tgtL = cmToScene(leftCm);
+    HOLD.tgtF = cmToScene(frontCm);
+    HOLD.tgtR = cmToScene(rightCm);
     const caption = document.getElementById("pilot-caption");
     if (!caption) return;
-    if (HOLD.drive < -40) caption.textContent = "Looking back · reverse";
-    else if (HOLD.drive > 25) caption.textContent = "Eyes forward · gas down";
-    else if (Math.abs(HOLD.turn) > 0.15) caption.textContent = HOLD.turn > 0 ? "Steering right" : "Steering left";
-    else caption.textContent = "Idle · waiting for drive";
+    const fmt = (cm) => (cm == null || cm < 0 ? "miss" : Math.round(cm) + " cm");
+    let pose = "Idle";
+    if (HOLD.drive < -40) pose = "Looking back · reverse";
+    else if (HOLD.drive > 25) pose = "Eyes forward · gas down";
+    else if (Math.abs(HOLD.turn) > 0.15) pose = HOLD.turn > 0 ? "Steering right" : "Steering left";
+    caption.textContent = pose + " · net L " + fmt(leftCm) + " / F " + fmt(frontCm) + " / R " + fmt(rightCm);
   }
 
   window.initFlyDriver = initFlyDriver;
