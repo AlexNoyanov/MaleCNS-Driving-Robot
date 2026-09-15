@@ -79,7 +79,7 @@ html, body { margin: 0; background: var(--bg); color: var(--ink); font: 14px/1.4
 .cns-tools button.active { border-color: var(--gold); color: var(--gold); }
 .cns-card {
   position: absolute; left: 8px; top: 8px; z-index: 2;
-  min-width: 158px; max-width: 220px; padding: 8px 10px;
+  min-width: 148px; max-width: 200px; padding: 7px 9px;
   border-radius: 8px; border: 1px solid var(--line);
   background: #0b0e14cc; backdrop-filter: blur(10px);
   pointer-events: none;
@@ -88,12 +88,15 @@ html, body { margin: 0; background: var(--bg); color: var(--ink); font: 14px/1.4
   font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted);
 }
 .cns-card strong { display: block; margin: 2px 0 0; font-size: 13px; }
-.cns-card p { margin: 2px 0 8px; color: var(--muted); font-size: 11px; }
+.cns-card p { margin: 2px 0 6px; color: var(--muted); font-size: 11px; }
 .cns-card dl { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 10px; margin: 0; }
 .cns-card dt { color: var(--muted); font-size: 10px; }
 .cns-card dd { margin: 0; font-variant-numeric: tabular-nums; color: var(--cyan); }
 .cns-card-extra { margin-top: 6px; font-size: 11px; color: var(--ink); }
-.cns-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.cns-chips {
+  position: absolute; left: 8px; right: 44px; bottom: 8px; z-index: 3;
+  display: flex; flex-wrap: wrap; gap: 6px;
+}
 .cns-chips button {
   background: transparent; color: var(--muted); border: 1px solid #333;
   padding: 4px 8px; border-radius: 999px; cursor: pointer; font-size: 11px;
