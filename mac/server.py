@@ -105,9 +105,9 @@ class ModeBody(BaseModel):
 
 def _idle_distances(t: int) -> tuple[float, float, float]:
     """Synthetic approaching-wall when no robot is connected (dashboard still alive)."""
-    phase = (t % 400) / 400.0
-    front = 100.0 - 90.0 * phase
-    return front, 80.0, 80.0
+    phase = (t % 240) / 240.0
+    front = 48.0 - 40.0 * phase
+    return front, 60.0, 70.0
 
 
 @app.on_event("startup")

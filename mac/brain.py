@@ -150,11 +150,12 @@ class FlyBrain:
         vis_right: float = 0.0,
     ):
         def inj(cm: float, vis: float) -> float:
+            # Far (~70cm+): subthreshold. Close (~15cm): tonic spikes past V_THRESH.
             if cm is None or cm < 0:
-                sonic = 0.0
+                close = 0.0
             else:
-                sonic = 1.0 / max(float(cm), 1.0)
-            return sonic + 0.5 * max(0.0, float(vis))
+                close = max(0.0, min(1.0, (38.0 - float(cm)) / 30.0))
+            return 0.04 + 2.6 * close + 0.9 * max(0.0, float(vis))
 
         if self._use_torch:
             ext = self._torch.zeros(self.n_neurons, device=self._device)
