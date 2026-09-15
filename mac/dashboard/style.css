@@ -95,7 +95,8 @@ html, body { margin: 0; background: var(--bg); color: var(--ink); font: 14px/1.4
 .cns-card-extra { margin-top: 6px; font-size: 11px; color: var(--ink); }
 .cns-chips {
   position: absolute; left: 8px; right: 44px; bottom: 8px; z-index: 3;
-  display: flex; flex-wrap: wrap; gap: 6px;
+  display: flex; flex-wrap: nowrap; gap: 5px;
+  overflow-x: auto;
 }
 .cns-chips button {
   background: #0b0e14cc; color: var(--muted); border: 1px solid #333;
