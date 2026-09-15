@@ -50,9 +50,22 @@ html, body { margin: 0; background: var(--bg); color: var(--ink); font: 14px/1.4
   padding: 12px 14px; min-height: 0; display: flex; flex-direction: column;
 }
 .panel h2 { margin: 0 0 8px; font-size: 13px; color: var(--muted); font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; }
+.cam-panel { min-height: 0; }
+.cam-pair {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  flex: 1;
+  min-height: 0;
+}
+.cam-col { display: flex; flex-direction: column; min-width: 0; min-height: 0; }
+.cam-col h2 { margin: 0 0 6px; }
 .cam-wrap { position: relative; flex: 1; background: #000; border-radius: 8px; overflow: hidden; }
 .cam-wrap img { width: 100%; height: 100%; object-fit: cover; }
-.cam-meta { position: absolute; left: 10px; bottom: 8px; font-size: 11px; color: #ddd; background: #0008; padding: 2px 8px; border-radius: 4px; }
+.cam-meta { position: absolute; left: 8px; bottom: 8px; font-size: 11px; color: #ddd; background: #0008; padding: 2px 8px; border-radius: 4px; }
+.fly-eye-wrap { background: #05060a; }
+.fly-eye-wrap .cam-meta { top: 8px; bottom: auto; }
+#fly-eye { width: 100%; height: 100%; display: block; }
 .cns-panel { min-height: 0; }
 .cns-stage {
   position: relative;

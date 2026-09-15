@@ -72,11 +72,22 @@
       </dl>
     </section>
 
-    <section class="panel">
-      <h2>Camera</h2>
-      <div class="cam-wrap">
-        <img id="cam" alt="Robot camera" src="/camera/stream" />
-        <div class="cam-meta" id="cam-meta">waiting for Pi…</div>
+    <section class="panel cam-panel">
+      <div class="cam-pair">
+        <div class="cam-col">
+          <h2>Camera</h2>
+          <div class="cam-wrap">
+            <img id="cam" alt="Robot camera" src="/camera/stream" />
+            <div class="cam-meta" id="cam-meta">waiting for Pi…</div>
+          </div>
+        </div>
+        <div class="cam-col">
+          <h2>Fly eyes</h2>
+          <div class="cam-wrap fly-eye-wrap">
+            <canvas id="fly-eye" aria-label="Compound-eye view of the camera"></canvas>
+            <div class="cam-meta" id="fly-eye-meta">ommatidia mosaic · UV / green</div>
+          </div>
+        </div>
       </div>
     </section>
 
@@ -118,6 +129,7 @@
   </main>
   <script src="/static/flydriver.js"></script>
   <script src="/static/cnsviewer.js"></script>
+  <script src="/static/flyeye.js"></script>
   <script src="/static/app.js"></script>
 </body>
 </html>

@@ -17,6 +17,9 @@ async function init() {
   brainReady = true;
   document.getElementById("geom-hint").textContent =
     "Click a lobe or chip · drag to orbit · +/− or scroll to zoom";
+  if (window.initFlyEye) {
+    window.initFlyEye(document.getElementById("fly-eye"));
+  }
 }
 
 function setPill(el, on, bad) {
@@ -84,6 +87,12 @@ function applyState(s) {
   document.getElementById("cam-meta").textContent = s.camera_ok
     ? (s.camera_fps || 0) + " fps"
     : (s.robot_connected ? "camera down" : "idle — connect Pi for live video");
+  const eyeMeta = document.getElementById("fly-eye-meta");
+  if (eyeMeta) {
+    eyeMeta.textContent = s.camera_ok
+      ? "compound eyes · " + (s.camera_fps || 0) + " fps"
+      : "compound eyes · idle mosaic";
+  }
 
   document.querySelectorAll("#modes button").forEach((b) => {
     b.classList.toggle("active", b.dataset.mode === s.mode);

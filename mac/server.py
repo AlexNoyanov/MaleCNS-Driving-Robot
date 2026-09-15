@@ -18,7 +18,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Set
 
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
-from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, StreamingResponse
+from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, Response, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
@@ -86,12 +86,21 @@ def _placeholder_jpeg() -> bytes:
         from PIL import Image, ImageDraw
         import io
 
-        img = Image.new("RGB", (640, 400), (10, 12, 18))
+        img = Image.new("RGB", (640, 400), (14, 16, 22))
         draw = ImageDraw.Draw(img)
-        draw.rectangle([24, 24, 616, 376], outline=(245, 197, 66), width=3)
-        draw.text((48, 180), "Waiting for Raspberry Pi camera…", fill=(220, 220, 220))
+        draw.polygon([(0, 0), (640, 0), (410, 148), (230, 148)], fill=(32, 36, 48))
+        draw.polygon([(0, 400), (640, 400), (410, 258), (230, 258)], fill=(42, 36, 30))
+        for t in range(1, 7):
+            y = 258 + int(142 * t / 7)
+            inset = 28 * t
+            draw.line([(230 - inset, y), (410 + inset, y)], fill=(78, 68, 52), width=1)
+        draw.polygon([(0, 0), (230, 148), (230, 258), (0, 400)], fill=(24, 52, 58))
+        draw.polygon([(640, 0), (410, 148), (410, 258), (640, 400)], fill=(58, 32, 28))
+        draw.rectangle([230, 148, 410, 258], fill=(48, 52, 44))
+        draw.rectangle([268, 178, 372, 258], fill=(196, 148, 52), outline=(245, 197, 66), width=3)
+        draw.text((20, 12), "Pi camera idle", fill=(190, 198, 210))
         buf = io.BytesIO()
-        img.save(buf, format="JPEG", quality=70)
+        img.save(buf, format="JPEG", quality=78)
         return buf.getvalue()
     except Exception:
         return b""
@@ -161,6 +170,16 @@ async def api_mode(body: ModeBody) -> JSONResponse:
         if body.manual_right is not None:
             state["manual_right"] = int(max(-255, min(255, body.manual_right)))
     return JSONResponse({"ok": True, "mode": state["mode"]})
+
+
+@app.get("/camera/frame")
+async def camera_frame() -> Response:
+    frame = last_jpeg or _placeholder_jpeg()
+    return Response(
+        content=frame,
+        media_type="image/jpeg",
+        headers={"Cache-Control": "no-store"},
+    )
 
 
 @app.get("/camera/stream")
