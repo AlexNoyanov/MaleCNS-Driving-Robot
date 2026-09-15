@@ -80,9 +80,34 @@
       </div>
     </section>
 
-    <section class="panel">
+    <section class="panel cns-panel">
       <h2>Fruit-fly CNS activity</h2>
-      <div id="brain3d"></div>
+      <div class="cns-stage">
+        <div id="brain3d"></div>
+        <div class="cns-tools">
+          <button type="button" id="cns-in" title="Zoom in" aria-label="Zoom in">+</button>
+          <button type="button" id="cns-out" title="Zoom out" aria-label="Zoom out">−</button>
+          <button type="button" id="cns-fit" title="Fit whole brain" aria-label="Fit whole brain">Fit</button>
+          <button type="button" id="cns-spin" title="Auto-rotate" aria-label="Auto-rotate">↻</button>
+        </div>
+        <aside class="cns-card" id="cns-card">
+          <div class="cns-card-kicker">Region</div>
+          <strong id="cns-card-title">Click a lobe</strong>
+          <p id="cns-card-role">Drag to orbit · scroll or +/− to zoom</p>
+          <dl>
+            <div><dt>Activity</dt><dd id="cns-card-act">—</dd></div>
+            <div><dt>Cells</dt><dd id="cns-card-n">—</dd></div>
+          </dl>
+          <div class="cns-card-extra" id="cns-card-extra"></div>
+        </aside>
+      </div>
+      <div class="cns-chips" id="cns-chips">
+        <button type="button" data-region="left">AL L <span data-pct="left">—</span></button>
+        <button type="button" data-region="front">AL F <span data-pct="front">—</span></button>
+        <button type="button" data-region="right">AL R <span data-pct="right">—</span></button>
+        <button type="button" data-region="vnc">VNC <span data-pct="vnc">—</span></button>
+        <button type="button" data-region="global">All <span data-pct="global">—</span></button>
+      </div>
       <p class="hint" id="geom-hint">navis Drosophila neuropil · live LIF spikes</p>
     </section>
 

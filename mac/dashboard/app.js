@@ -16,7 +16,7 @@ async function init() {
   }
   brainReady = true;
   document.getElementById("geom-hint").textContent =
-    "navis-org/navis neuropil mesh · live MaleCNS LIF";
+    "Click a lobe or chip · drag to orbit · +/− or scroll to zoom";
 }
 
 function setPill(el, on, bad) {

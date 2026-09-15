@@ -53,8 +53,54 @@ html, body { margin: 0; background: var(--bg); color: var(--ink); font: 14px/1.4
 .cam-wrap { position: relative; flex: 1; background: #000; border-radius: 8px; overflow: hidden; }
 .cam-wrap img { width: 100%; height: 100%; object-fit: cover; }
 .cam-meta { position: absolute; left: 10px; bottom: 8px; font-size: 11px; color: #ddd; background: #0008; padding: 2px 8px; border-radius: 4px; }
-#brain3d { flex: 1; min-height: 220px; border-radius: 8px; overflow: hidden; background: #07080c; }
-#brain3d canvas { width: 100%; height: 100%; display: block; }
+.cns-panel { min-height: 0; }
+.cns-stage {
+  position: relative;
+  flex: 1;
+  min-height: 200px;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #07080c;
+}
+#brain3d { position: absolute; inset: 0; }
+#brain3d canvas { width: 100%; height: 100%; display: block; cursor: grab; touch-action: none; }
+#brain3d canvas.is-drag { cursor: grabbing; }
+#brain3d canvas.is-hit { cursor: pointer; }
+.cns-tools {
+  position: absolute; right: 8px; top: 8px; z-index: 3;
+  display: flex; flex-direction: column; gap: 6px;
+}
+.cns-tools button {
+  width: 32px; height: 32px; border-radius: 8px; cursor: pointer;
+  border: 1px solid #334055; background: #0b0e14cc; color: var(--ink);
+  font-size: 16px; line-height: 1; backdrop-filter: blur(8px);
+}
+.cns-tools button:hover { border-color: var(--cyan); color: var(--cyan); }
+.cns-tools button.active { border-color: var(--gold); color: var(--gold); }
+.cns-card {
+  position: absolute; left: 8px; top: 8px; z-index: 2;
+  min-width: 158px; max-width: 220px; padding: 8px 10px;
+  border-radius: 8px; border: 1px solid var(--line);
+  background: #0b0e14cc; backdrop-filter: blur(10px);
+  pointer-events: none;
+}
+.cns-card-kicker {
+  font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted);
+}
+.cns-card strong { display: block; margin: 2px 0 0; font-size: 13px; }
+.cns-card p { margin: 2px 0 8px; color: var(--muted); font-size: 11px; }
+.cns-card dl { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 10px; margin: 0; }
+.cns-card dt { color: var(--muted); font-size: 10px; }
+.cns-card dd { margin: 0; font-variant-numeric: tabular-nums; color: var(--cyan); }
+.cns-card-extra { margin-top: 6px; font-size: 11px; color: var(--ink); }
+.cns-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.cns-chips button {
+  background: transparent; color: var(--muted); border: 1px solid #333;
+  padding: 4px 8px; border-radius: 999px; cursor: pointer; font-size: 11px;
+}
+.cns-chips button:hover { border-color: var(--cyan); color: var(--ink); }
+.cns-chips button.active { border-color: var(--gold); color: var(--gold); }
+.cns-chips span { color: var(--cyan); margin-left: 4px; font-variant-numeric: tabular-nums; }
 .hint { margin: 6px 0 0; color: var(--muted); font-size: 11px; }
 .bar-row { display: grid; grid-template-columns: 48px 1fr 52px; gap: 8px; align-items: center; margin: 8px 0; }
 .bar { height: 12px; background: #1c2430; border-radius: 6px; overflow: hidden; }
