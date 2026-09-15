@@ -37,7 +37,7 @@ html, body { margin: 0; background: var(--bg); color: var(--ink); font: 14px/1.4
 .grid {
   display: grid;
   grid-template-columns: 1.15fr 1.15fr 0.95fr;
-  grid-template-rows: minmax(300px, 1.15fr) minmax(220px, 0.85fr) 220px;
+  grid-template-rows: minmax(300px, 1.15fr) minmax(260px, 0.95fr) 200px;
   gap: 12px; padding: 12px;
   height: calc(100vh - 78px);
 }
@@ -98,12 +98,14 @@ html, body { margin: 0; background: var(--bg); color: var(--ink); font: 14px/1.4
   display: flex; flex-wrap: wrap; gap: 6px;
 }
 .cns-chips button {
-  background: transparent; color: var(--muted); border: 1px solid #333;
+  background: #0b0e14cc; color: var(--muted); border: 1px solid #333;
   padding: 4px 8px; border-radius: 999px; cursor: pointer; font-size: 11px;
+  backdrop-filter: blur(8px);
 }
 .cns-chips button:hover { border-color: var(--cyan); color: var(--ink); }
 .cns-chips button.active { border-color: var(--gold); color: var(--gold); }
 .cns-chips span { color: var(--cyan); margin-left: 4px; font-variant-numeric: tabular-nums; }
+.cns-panel .hint { display: none; }
 .hint { margin: 6px 0 0; color: var(--muted); font-size: 11px; }
 .bar-row { display: grid; grid-template-columns: 48px 1fr 52px; gap: 8px; align-items: center; margin: 8px 0; }
 .bar { height: 12px; background: #1c2430; border-radius: 6px; overflow: hidden; }
