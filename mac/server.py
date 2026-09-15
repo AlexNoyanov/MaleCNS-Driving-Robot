@@ -18,13 +18,13 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Set
 
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
-from fastapi.responses import HTMLResponse, JSONResponse, StreamingResponse
+from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
 from mac.brain import FlyBrain
 from mac.controller import STALE_TELEMETRY_S, hybrid_command
-from mac.geometry import load_or_build_geometry
+from mac.geometry import MESH_PATH, load_or_build_geometry
 from mac.vision import visual_closeness
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -68,6 +68,10 @@ state: Dict[str, Any] = {
     "vis_left": 0.0,
     "vis_front": 0.0,
     "vis_right": 0.0,
+    "region_activity": {
+        "left": 0.0, "front": 0.0, "right": 0.0,
+        "motor_left": 0.0, "motor_right": 0.0, "global": 0.0,
+    },
 }
 
 last_jpeg: bytes = b""
@@ -133,6 +137,13 @@ async def index() -> HTMLResponse:
 @app.get("/api/geometry")
 async def api_geometry() -> JSONResponse:
     return JSONResponse(geometry)
+
+
+@app.get("/api/brain-mesh")
+async def api_brain_mesh():
+    if not MESH_PATH.exists():
+        return JSONResponse({"error": "brain_mesh.json missing"}, status_code=404)
+    return FileResponse(MESH_PATH, media_type="application/json")
 
 
 @app.get("/api/state")
@@ -315,6 +326,7 @@ async def control_loop() -> None:
         if len(raster) > 240:
             raster = raster[-180:]
         activity = brain.activity_for_indices(viz_indices)
+        regions = brain.region_activity()
 
         now = time.perf_counter()
         dt = now - last
@@ -330,6 +342,7 @@ async def control_loop() -> None:
             state["emergency"] = emergency
             state["sim_hz"] = round(hz_ema, 1)
             state["spike_rate"] = round(float(spikes.mean()), 4)
+            state["region_activity"] = regions
             if not robot_on:
                 state["front_cm"] = front
                 state["left_cm"] = left

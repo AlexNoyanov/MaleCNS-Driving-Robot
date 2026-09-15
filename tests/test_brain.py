@@ -23,6 +23,6 @@ class BrainLocalTests(unittest.TestCase):
     def test_geometry_offline(self):
         brain = FlyBrain()
         geom = build_fly_cns_geometry(brain.body_ids)
-        self.assertEqual(geom["source"], "procedural_fly_cns")
+        self.assertEqual(geom["source"], "navis_neuropil_plus_io_layout")
         self.assertGreater(len(geom["neurons"]), 20)
         self.assertGreater(len(geom["silhouette"]["x"]), 20)

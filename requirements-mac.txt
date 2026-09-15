@@ -7,6 +7,9 @@ websockets>=12.0
 pydantic>=2.0
 # torch is optional; NumPy COO fallback is used if it is missing
 # torch
+# template Drosophila neuropil mesh (already exported to data/skeletons/brain_mesh.json):
+# navis
+# flybrains
 # one-time connectome / skeleton fetch only:
 # neuprint-python
 # navis

@@ -201,4 +201,29 @@ class FlyBrain:
         return [int(v) for v in (spikes[self.raster_idx] > 0.5)]
 
     def activity_for_indices(self, indices: Sequence[int]) -> list:
-        return [round(float(self._ema[i]), 4) for i in indices]
+        """Boosted 0–1 activity so the 3D view actually flashes."""
+        spikes = self.spikes.detach().cpu().numpy() if self._use_torch else self.spikes
+        out = []
+        for i in indices:
+            v = max(float(self._ema[i]) * 8.0, float(spikes[i]))
+            out.append(round(min(1.0, v), 4))
+        return out
+
+    def region_activity(self) -> dict:
+        ema = self._ema
+        spikes = self.spikes.detach().cpu().numpy() if self._use_torch else self.spikes
+
+        def mean(idxs):
+            if not idxs:
+                return 0.0
+            raw = 0.7 * float(np.mean(ema[idxs])) + 0.3 * float(np.mean(spikes[idxs]))
+            return round(float(min(1.0, raw * 8.0)), 4)
+
+        return {
+            "left": mean(self.sensor_left),
+            "front": mean(self.sensor_front),
+            "right": mean(self.sensor_right),
+            "motor_left": mean(self.motor_left),
+            "motor_right": mean(self.motor_right),
+            "global": round(float(min(1.0, float(ema.mean()) * 50.0)), 4),
+        }

@@ -11,45 +11,12 @@ const rasterCanvas = document.getElementById("raster");
 const ctx = rasterCanvas.getContext("2d");
 
 async function init() {
-  const g = await fetch("/api/geometry").then((r) => r.json());
-  geometry = g;
-  const sil = g.silhouette || { x: [], y: [], z: [] };
-  const neu = g.neurons || [];
-  const traceSil = {
-    type: "scatter3d",
-    mode: "markers",
-    x: sil.x, y: sil.y, z: sil.z,
-    marker: { size: 2, color: "rgba(90,110,140,0.35)" },
-    hoverinfo: "skip",
-    name: "CNS outline",
-  };
-  const traceN = {
-    type: "scatter3d",
-    mode: "markers",
-    x: neu.map((n) => n.x),
-    y: neu.map((n) => n.y),
-    z: neu.map((n) => n.z),
-    marker: { size: 5, color: neu.map(() => 0), colorscale: "Hot", cmin: 0, cmax: 1, line: { width: 0 } },
-    text: neu.map((n) => `${n.region} · ${n.body_id}`),
-    name: "neurons",
-  };
-  Plotly.newPlot("brain3d", [traceSil, traceN], {
-    paper_bgcolor: "#10141c",
-    plot_bgcolor: "#10141c",
-    margin: { l: 0, r: 0, t: 0, b: 0 },
-    scene: {
-      bgcolor: "#10141c",
-      xaxis: { visible: false },
-      yaxis: { visible: false },
-      zaxis: { visible: false },
-      camera: { eye: { x: 1.6, y: 1.4, z: 0.9 } },
-    },
-    showlegend: false,
-  }, { displayModeBar: false, responsive: true });
+  if (window.initCnsViewer) {
+    await window.initCnsViewer(document.getElementById("brain3d"));
+  }
   brainReady = true;
   document.getElementById("geom-hint").textContent =
-    (g.source === "procedural_fly_cns" ? "Procedural local CNS (offline) · " : "Cached skeletons · ") +
-    neu.length + " tracked neurons";
+    "navis-org/navis neuropil mesh · live MaleCNS LIF";
 }
 
 function setPill(el, on, bad) {
@@ -123,8 +90,8 @@ function applyState(s) {
   });
 
   drawRaster(s.raster);
-  if (brainReady && s.activity && s.activity.length) {
-    Plotly.restyle("brain3d", { "marker.color": [s.activity] }, [1]);
+  if (window.updateCnsViewer) {
+    window.updateCnsViewer(s.activity, s.region_activity || {});
   }
   if (window.updateFlyDriver) {
     window.updateFlyDriver(s.left_pwm, s.right_pwm, s.left_cm, s.front_cm, s.right_cm);
