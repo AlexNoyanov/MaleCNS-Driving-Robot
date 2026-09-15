@@ -4,6 +4,7 @@
 
 
 ## Making Fruit Fly brain model to drive a bot in real life, getting video from camera, distances from ultrasonic sensors  
+
 <img width="800" height="449" alt="ezgif com-video-to-gif-converter" src="https://github.com/user-attachments/assets/88699a0c-5c37-47d6-91ce-a8032cab439f" />
 
 
