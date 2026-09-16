@@ -507,6 +507,23 @@
       b.addEventListener("click", () => focusRegion(b.dataset.region, b.dataset.region !== "global"));
     });
 
+    const card = document.getElementById("cns-card");
+    const hideCard = document.getElementById("cns-card-hide");
+    const showCard = document.getElementById("cns-card-show");
+    function setCardOpen(open) {
+      if (card) card.classList.toggle("is-hidden", !open);
+      if (showCard) showCard.classList.toggle("is-hidden", open);
+    }
+    setCardOpen(false);
+    if (hideCard) hideCard.addEventListener("click", (ev) => {
+      ev.stopPropagation();
+      setCardOpen(false);
+    });
+    if (showCard) showCard.addEventListener("click", (ev) => {
+      ev.stopPropagation();
+      setCardOpen(true);
+    });
+
     resize();
     window.addEventListener("resize", resize);
     requestAnimationFrame(resize);

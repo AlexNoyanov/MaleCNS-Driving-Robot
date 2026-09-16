@@ -92,14 +92,30 @@ html, body { margin: 0; background: var(--bg); color: var(--ink); font: 14px/1.4
 .cns-tools button.active { border-color: var(--gold); color: var(--gold); }
 .cns-card {
   position: absolute; left: 8px; top: 8px; z-index: 2;
-  min-width: 148px; max-width: 200px; padding: 7px 9px;
+  min-width: 148px; max-width: 188px; padding: 6px 8px 7px;
   border-radius: 8px; border: 1px solid var(--line);
   background: #0b0e14cc; backdrop-filter: blur(10px);
-  pointer-events: none;
+  pointer-events: auto;
 }
+.cns-card.is-hidden { display: none; }
+.cns-card-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
 .cns-card-kicker {
   font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted);
 }
+#cns-card-hide {
+  width: 22px; height: 22px; padding: 0; border-radius: 6px; cursor: pointer;
+  border: 1px solid #334055; background: transparent; color: var(--muted); line-height: 1;
+}
+#cns-card-hide:hover { border-color: var(--gold); color: var(--gold); }
+.cns-card-show {
+  position: absolute; left: 8px; top: 8px; z-index: 3;
+  padding: 4px 8px; border-radius: 999px; cursor: pointer;
+  border: 1px solid #334055; background: #0b0e14cc; color: var(--muted);
+  font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase;
+  backdrop-filter: blur(8px);
+}
+.cns-card-show:hover { border-color: var(--cyan); color: var(--ink); }
+.cns-card-show.is-hidden { display: none; }
 .cns-card strong { display: block; margin: 2px 0 0; font-size: 13px; }
 .cns-card p { margin: 2px 0 6px; color: var(--muted); font-size: 11px; }
 .cns-card dl { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 10px; margin: 0; }

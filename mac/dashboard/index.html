@@ -101,8 +101,11 @@
           <button type="button" id="cns-fit" title="Fit whole brain" aria-label="Fit whole brain">Fit</button>
           <button type="button" id="cns-spin" title="Auto-rotate" aria-label="Auto-rotate">↻</button>
         </div>
-        <aside class="cns-card" id="cns-card">
-          <div class="cns-card-kicker">Region</div>
+        <aside class="cns-card is-hidden" id="cns-card">
+          <div class="cns-card-head">
+            <div class="cns-card-kicker">Region</div>
+            <button type="button" id="cns-card-hide" title="Hide region card" aria-label="Hide region card">×</button>
+          </div>
           <strong id="cns-card-title">Click a lobe</strong>
           <p id="cns-card-role">Drag to orbit · scroll or +/− to zoom</p>
           <dl>
@@ -111,6 +114,7 @@
           </dl>
           <div class="cns-card-extra" id="cns-card-extra"></div>
         </aside>
+        <button type="button" id="cns-card-show" class="cns-card-show" title="Show region card">Region</button>
         <div class="cns-chips" id="cns-chips">
           <button type="button" data-region="left">AL L <span data-pct="left">—</span></button>
           <button type="button" data-region="front">AL F <span data-pct="front">—</span></button>
