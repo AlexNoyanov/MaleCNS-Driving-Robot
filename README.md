@@ -56,11 +56,11 @@ From **this Mac** (no interactive SSH):
 ```bash
 ./scripts/deploy-pi.sh              # copy code, enable boot start, restart agent
 ./scripts/deploy-pi.sh --flash      # same, then flash the Uno
-./scripts/deploy-pi.sh --copy-key   # one-time: install this Mac’s SSH key on the Pi
+./scripts/deploy-pi.sh --host 192.168.1.140   # if the Pi got a new DHCP address
 ```
 
 Defaults: `ynoyanov@192.168.1.133`, repo `~/Work/AI-Brains/MaleCNS-Driving-Robot`.
-Override in `scripts/deploy-pi.env` (see `scripts/deploy-pi.env.example`; that file is gitignored).
+Override in `scripts/deploy-pi.env` (gitignored; copy from `scripts/deploy-pi.env.example`).
 
 On the Mac: `python -m mac.server` (listens on `0.0.0.0:8000`). The Pi opens
 `ws://<mac>:8000/robot`.

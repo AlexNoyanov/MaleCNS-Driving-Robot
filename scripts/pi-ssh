@@ -1,7 +1,7 @@
 #!/bin/bash
 # SSH wrapper for deploy-pi.sh / rsync -e. Key auth if it works; else PI_PASSWORD via sshpass.
 set -euo pipefail
-OPTS=(-o StrictHostKeyChecking=accept-new -o ConnectTimeout=20)
+OPTS=(-o StrictHostKeyChecking=accept-new -o ConnectTimeout=20 -o RequestTTY=no)
 if [ -n "${PI_PASSWORD:-}" ] && command -v sshpass >/dev/null 2>&1; then
   export SSHPASS="$PI_PASSWORD"
   exec sshpass -e ssh "${OPTS[@]}" "$@"

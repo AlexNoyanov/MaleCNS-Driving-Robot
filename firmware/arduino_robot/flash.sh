@@ -8,9 +8,19 @@ PORT="${1:-/dev/ttyACM0}"
 DIR="$(cd "$(dirname "$0")" && pwd)"
 cd "$DIR"
 
+as_root() {
+  if [ "$(id -u)" -eq 0 ]; then
+    "$@"
+  elif [ -n "${PI_PASSWORD:-}" ]; then
+    printf '%s\n' "$PI_PASSWORD" | sudo -S "$@"
+  else
+    sudo "$@"
+  fi
+}
+
 if systemctl is-active --quiet fly-brain-robot 2>/dev/null; then
   echo "Stopping fly-brain-robot so the USB port is free…"
-  sudo systemctl stop fly-brain-robot
+  as_root systemctl stop fly-brain-robot
   RESTART_AGENT=1
 else
   RESTART_AGENT=0
@@ -36,6 +46,6 @@ echo "Flashing $HEX → $PORT"
 
 if [ "$RESTART_AGENT" = 1 ]; then
   echo "Starting fly-brain-robot…"
-  sudo systemctl start fly-brain-robot
+  as_root systemctl start fly-brain-robot
 fi
 echo "Done."
