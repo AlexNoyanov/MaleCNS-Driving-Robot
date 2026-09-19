@@ -51,51 +51,33 @@ Without a token, `scripts/cache_skeletons.py` still writes a local procedural CN
 
 Same Wi-Fi as the Mac. USB from Pi → Arduino. USB camera or CSI ribbon.
 
+From **this Mac** (no interactive SSH):
+
+```bash
+./scripts/deploy-pi.sh              # copy code, enable boot start, restart agent
+./scripts/deploy-pi.sh --flash      # same, then flash the Uno
+./scripts/deploy-pi.sh --copy-key   # one-time: install this Mac’s SSH key on the Pi
+```
+
+Defaults: `ynoyanov@192.168.1.133`, repo `~/Work/AI-Brains/MaleCNS-Driving-Robot`.
+Override in `scripts/deploy-pi.env` (see `scripts/deploy-pi.env.example`; that file is gitignored).
+
+On the Mac: `python -m mac.server` (listens on `0.0.0.0:8000`). The Pi opens
+`ws://<mac>:8000/robot`.
+
+First-time packages on the Pi (once):
+
 ```bash
 sudo apt install python3-picamera2 python3-serial python3-pip gcc-avr avr-libc avrdude arduino-core-avr arduino-mk
 pip3 install -r requirements-pi.txt --break-system-packages
 ```
 
-### Flash firmware (from the Pi)
+Do **not** use `arduino-cli` on this Pi. `./scripts/deploy-pi.sh --flash` uses Debian `avrdude`.
 
-Stop anything using the Arduino USB port, then:
-
-```bash
-cd ~/Work/AI-Brains/MaleCNS-Driving-Robot/firmware/arduino_robot
-./flash.sh
-```
-
-Do **not** use `arduino-cli` on this Pi (snap is the wrong arch; downloads.arduino.cc returns 403). The script uses Debian `avrdude`.
-
-### Start the agent (once, by hand)
-
-On the Mac: `python -m mac.server` (must listen on `0.0.0.0:8000`).
+If the Mac’s IP changes, run `./scripts/deploy-pi.sh` again (it writes `MAC_HOST`).
 
 ```bash
-cd ~/Work/AI-Brains/MaleCNS-Driving-Robot
-python3 pi/robot_agent.py --mac-host <MAC_LAN_IP> --usb-camera
-```
-
-The Pi **opens** `ws://<mac>:8000/robot`. Allow Python incoming connections on
-the Mac firewall if prompted.
-
-### Start automatically on boot
-
-```bash
-cd ~/Work/AI-Brains/MaleCNS-Driving-Robot
-sudo ./pi/install-autostart.sh <MAC_LAN_IP>
-```
-
-After that, reboot is enough. If the Mac’s IP changes:
-
-```bash
-sudo nano /etc/default/fly-brain-robot   # edit MAC_HOST
-sudo systemctl restart fly-brain-robot
-```
-
-```bash
-sudo systemctl status fly-brain-robot
-journalctl -u fly-brain-robot -f
+./scripts/pi-ssh ynoyanov@192.168.1.133 'journalctl -u fly-brain-robot -f'
 ```
 
 ## 4. Closed loop without hardware

@@ -46,6 +46,9 @@ if [ -z "${MAC_HOST:-}" ]; then
   done
 fi
 if [ -z "${MAC_HOST:-}" ]; then
+  MAC_HOST="$(networksetup -getinfo Wi-Fi 2>/dev/null | awk -F': ' '/^IP address: /{print $2; exit}' || true)"
+fi
+if [ -z "${MAC_HOST:-}" ]; then
   echo "Could not detect this Mac's LAN IP. Set MAC_HOST=192.168.x.x" >&2
   exit 1
 fi
@@ -63,7 +66,7 @@ if [ -n "${PI_PASSWORD:-}" ] && ! command -v sshpass >/dev/null 2>&1; then
 fi
 
 chmod +x "$SSH_WRAP" "$REPO/firmware/arduino_robot/flash.sh" "$REPO/pi/install-autostart.sh"
-export PI_PASSWORD
+export PI_PASSWORD="${PI_PASSWORD:-}"
 
 pi_ssh() { "$SSH_WRAP" "$TARGET" "$@"; }
 
