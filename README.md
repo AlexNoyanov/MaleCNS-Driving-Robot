@@ -18,6 +18,9 @@ real `male-cns:v1.0` subset (AL(R), ~4057 neurons). After that file exists,
 
 ## 1. Wire the robot
 
+
+
+
 Follow **[docs/WIRING.md](docs/WIRING.md)** for the **L298N/L298D** pinout on this acrylic 2WD chassis
 (4×AA pack → driver motor power, Arduino → IN1–IN4, Pi USB → Arduino only).
 
