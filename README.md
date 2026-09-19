@@ -1,3 +1,4 @@
+
 # MaleCNS Fly Brain driving two-wheeled Robot project
 <img width="618" height="409" alt="Screenshot 2026-09-15 at 22 37 58" src="https://github.com/user-attachments/assets/2d9a8ef0-f298-49c9-a2aa-4406d33785ef" />
 
@@ -18,8 +19,7 @@ real `male-cns:v1.0` subset (AL(R), ~4057 neurons). After that file exists,
 
 ## 1. Wire the robot
 
-
-
+[IMG_3170.heic.pdf](https://github.com/user-attachments/files/32423288/IMG_3170.heic.pdf)
 
 Follow **[docs/WIRING.md](docs/WIRING.md)** for the **L298N/L298D** pinout on this acrylic 2WD chassis
 (4×AA pack → driver motor power, Arduino → IN1–IN4, Pi USB → Arduino only).
