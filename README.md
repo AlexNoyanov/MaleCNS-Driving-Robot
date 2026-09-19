@@ -49,16 +49,54 @@ Without a token, `scripts/cache_skeletons.py` still writes a local procedural CN
 
 ## 3. Raspberry Pi 4
 
-Same Wi-Fi as the Mac. USB from Pi → Arduino. CSI camera on the ribbon.
+Same Wi-Fi as the Mac. USB from Pi → Arduino. USB camera or CSI ribbon.
 
 ```bash
-sudo apt install python3-picamera2 python3-serial python3-pip
+sudo apt install python3-picamera2 python3-serial python3-pip gcc-avr avr-libc avrdude arduino-core-avr arduino-mk
 pip3 install -r requirements-pi.txt --break-system-packages
-python3 pi/robot_agent.py --mac-host <MAC_LAN_IP>
+```
+
+### Flash firmware (from the Pi)
+
+Stop anything using the Arduino USB port, then:
+
+```bash
+cd ~/Work/AI-Brains/MaleCNS-Driving-Robot/firmware/arduino_robot
+./flash.sh
+```
+
+Do **not** use `arduino-cli` on this Pi (snap is the wrong arch; downloads.arduino.cc returns 403). The script uses Debian `avrdude`.
+
+### Start the agent (once, by hand)
+
+On the Mac: `python -m mac.server` (must listen on `0.0.0.0:8000`).
+
+```bash
+cd ~/Work/AI-Brains/MaleCNS-Driving-Robot
+python3 pi/robot_agent.py --mac-host <MAC_LAN_IP> --usb-camera
 ```
 
 The Pi **opens** `ws://<mac>:8000/robot`. Allow Python incoming connections on
 the Mac firewall if prompted.
+
+### Start automatically on boot
+
+```bash
+cd ~/Work/AI-Brains/MaleCNS-Driving-Robot
+sudo ./pi/install-autostart.sh <MAC_LAN_IP>
+```
+
+After that, reboot is enough. If the Mac’s IP changes:
+
+```bash
+sudo nano /etc/default/fly-brain-robot   # edit MAC_HOST
+sudo systemctl restart fly-brain-robot
+```
+
+```bash
+sudo systemctl status fly-brain-robot
+journalctl -u fly-brain-robot -f
+```
 
 ## 4. Closed loop without hardware
 

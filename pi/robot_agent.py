@@ -106,30 +106,56 @@ class SerialBridge:
         if serial is None:
             print("pyserial not installed; running without Arduino", file=sys.stderr)
             return
-        if not self.port_name:
-            print("No serial port found; running without Arduino", file=sys.stderr)
-            return
-        try:
-            self._ser = serial.Serial(self.port_name, self.baud, timeout=0.05)
-            self.serial_ok = True
-            print(f"Arduino serial open: {self.port_name} @ {self.baud}")
-        except Exception as exc:
-            print(f"Serial open failed ({self.port_name}): {exc}", file=sys.stderr)
-            self._ser = None
-            self.serial_ok = False
-            return
         self._thread = threading.Thread(target=self._read_loop, name="serial-rx", daemon=True)
         self._thread.start()
 
+    def _close_serial(self) -> None:
+        ser = self._ser
+        self._ser = None
+        self.serial_ok = False
+        if ser is None:
+            return
+        try:
+            ser.close()
+        except Exception:
+            pass
+
+    def _ensure_open(self) -> bool:
+        if self._ser is not None:
+            return True
+        port = detect_serial_port(self.port_name)
+        if not port:
+            return False
+        try:
+            ser = serial.Serial(port, self.baud, timeout=0.05)
+        except Exception as exc:
+            print(f"Serial open failed ({port}): {exc}", file=sys.stderr)
+            return False
+        with self._lock:
+            self._ser = ser
+            self.port_name = self.port_name or port
+            self.serial_ok = True
+            self._rx_buf = ""
+        print(f"Arduino serial open: {port} @ {self.baud}")
+        return True
+
     def _read_loop(self) -> None:
-        assert self._ser is not None
+        next_try = 0.0
         while not self._stop.is_set():
+            if self._ser is None:
+                now = time.time()
+                if now < next_try:
+                    time.sleep(0.2)
+                    continue
+                if not self._ensure_open():
+                    next_try = now + 1.5
+                    continue
             try:
                 data = self._ser.read(256)
             except Exception:
                 with self._lock:
-                    self.serial_ok = False
-                time.sleep(0.2)
+                    self._close_serial()
+                time.sleep(0.4)
                 continue
             if not data:
                 continue
@@ -165,7 +191,7 @@ class SerialBridge:
             ser.flush()
         except Exception:
             with self._lock:
-                self.serial_ok = False
+                self._close_serial()
 
     def stop(self) -> None:
         self._stop.set()
