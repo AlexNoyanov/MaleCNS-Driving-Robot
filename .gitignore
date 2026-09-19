@@ -4,6 +4,8 @@ __pycache__/
 *.py[cod]
 .DS_Store
 .env
+scripts/deploy-pi.env
+deploy-pi.env
 *.egg-info/
 .pytest_cache/
 .mypy_cache/
