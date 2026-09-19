@@ -29,13 +29,24 @@ const int IN2 = 5;  // left (PWM)
 const int IN3 = 6;  // right (PWM)
 const int IN4 = 7;  // right
 
-const unsigned long PING_TIMEOUT_US = 20000UL;  // ~340 cm max; miss -> -1
+const unsigned long PING_TIMEOUT_US = 16000UL;  // ~275 cm
 const unsigned long WATCHDOG_MS = 200;
 const unsigned long BAUD = 115200;
+const float MIN_CM = 2.0f;
+const float MAX_CM = 250.0f;
+const float MAX_JUMP_CM = 30.0f;
+const uint8_t HOLD_MISS = 6;
+const uint8_t SETTLE_MS = 14;
 
 float distFront = -1.0f;
 float distLeft = -1.0f;
 float distRight = -1.0f;
+float holdFront = -1.0f;
+float holdLeft = -1.0f;
+float holdRight = -1.0f;
+uint8_t missFront = 0;
+uint8_t missLeft = 0;
+uint8_t missRight = 0;
 
 int leftPwm = 0;
 int rightPwm = 0;
@@ -43,6 +54,17 @@ unsigned long lastCmdMs = 0;
 int pingPhase = 0;
 
 String serialBuf;
+
+void stopMotors();
+void applyMotors();
+void setOneMotor(int pwm, int inA, int inB, bool aPwm, bool bPwm);
+void writeIn(int pin, int mag, bool pwmCapable);
+int clampPwm(long v);
+float rawPing(int trig, int echo);
+float burstPing(int trig, int echo);
+float stabilize(int trig, int echo, float *hold, uint8_t *miss);
+void handleLine(String line);
+void pollSerial();
 
 void setup() {
   Serial.begin(BAUD);
@@ -63,20 +85,87 @@ void setup() {
   pinMode(IN4, OUTPUT);
 
   stopMotors();
-  lastCmdMs = millis();  // start stopped; watchdog keeps them stopped until M,
+  lastCmdMs = millis();
 }
 
-float ping(int trig, int echo) {
+void waitEchoIdle(int echo) {
+  unsigned long t0 = micros();
+  while (digitalRead(echo) == HIGH) {
+    if (micros() - t0 > 1500UL) break;
+  }
+}
+
+float rawPing(int trig, int echo) {
+  waitEchoIdle(echo);
   digitalWrite(trig, LOW);
-  delayMicroseconds(2);
+  delayMicroseconds(4);
   digitalWrite(trig, HIGH);
   delayMicroseconds(10);
   digitalWrite(trig, LOW);
   unsigned long us = pulseIn(echo, HIGH, PING_TIMEOUT_US);
-  if (us == 0) {
+  if (us == 0) return -1.0f;
+  float cm = us / 58.0f;
+  if (cm < MIN_CM || cm > MAX_CM) return -1.0f;
+  return cm;
+}
+
+float burstPing(int trig, int echo) {
+  float a = rawPing(trig, echo);
+  pollSerial();
+  delayMicroseconds(600);
+  float b = rawPing(trig, echo);
+  pollSerial();
+  if (a > 0 && b > 0 && fabs(a - b) <= 8.0f) {
+    return (a + b) * 0.5f;
+  }
+  delayMicroseconds(600);
+  float c = rawPing(trig, echo);
+  float vals[3];
+  uint8_t n = 0;
+  if (a > 0) vals[n++] = a;
+  if (b > 0) vals[n++] = b;
+  if (c > 0) vals[n++] = c;
+  if (n == 0) return -1.0f;
+  if (n == 1) return vals[0];
+  if (n == 2) return (vals[0] + vals[1]) * 0.5f;
+  // median of 3
+  if (vals[0] > vals[1]) { float t = vals[0]; vals[0] = vals[1]; vals[1] = t; }
+  if (vals[1] > vals[2]) { float t = vals[1]; vals[1] = vals[2]; vals[2] = t; }
+  if (vals[0] > vals[1]) { float t = vals[0]; vals[0] = vals[1]; vals[1] = t; }
+  return vals[1];
+}
+
+float stabilize(int trig, int echo, float *hold, uint8_t *miss) {
+  float raw = burstPing(trig, echo);
+  bool accept = false;
+  if (raw > 0) {
+    if (*hold < 0 || fabs(raw - *hold) <= MAX_JUMP_CM) {
+      accept = true;
+    } else {
+      delay(2);
+      float confirm = burstPing(trig, echo);
+      if (confirm > 0 && fabs(confirm - raw) <= 10.0f) {
+        raw = confirm;
+        accept = true;
+      }
+    }
+  }
+
+  if (accept) {
+    if (*hold > 0) {
+      raw = 0.35f * raw + 0.65f * (*hold);
+    }
+    *hold = raw;
+    *miss = 0;
+    return raw;
+  }
+
+  (*miss)++;
+  if (*miss >= HOLD_MISS) {
+    *hold = -1.0f;
     return -1.0f;
   }
-  return us / 58.0f;
+  return *hold;
 }
 
 int clampPwm(long v) {
@@ -158,11 +247,11 @@ void loop() {
 
   // One sensor per loop so pulseIn cannot starve the watchdog / serial.
   if (pingPhase == 0) {
-    distFront = ping(TRIG_FRONT, ECHO_FRONT);
+    distFront = stabilize(TRIG_FRONT, ECHO_FRONT, &holdFront, &missFront);
   } else if (pingPhase == 1) {
-    distLeft = ping(TRIG_LEFT, ECHO_LEFT);
+    distLeft = stabilize(TRIG_LEFT, ECHO_LEFT, &holdLeft, &missLeft);
   } else {
-    distRight = ping(TRIG_RIGHT, ECHO_RIGHT);
+    distRight = stabilize(TRIG_RIGHT, ECHO_RIGHT, &holdRight, &missRight);
     Serial.print("S,");
     Serial.print(distFront, 1);
     Serial.print(",");
@@ -171,4 +260,5 @@ void loop() {
     Serial.println(distRight, 1);
   }
   pingPhase = (pingPhase + 1) % 3;
+  delay(SETTLE_MS);
 }
