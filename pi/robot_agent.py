@@ -6,7 +6,7 @@ Streams JPEG frames and telemetry to the Mac brain server over Wi-Fi.
 
 The Pi initiates the connection:
 
-    python3 pi/robot_agent.py --mac-host 192.168.1.20
+    python3 pi/robot_agent.py --mac-host 192.168.1.20 --usb-camera
 
 On Raspberry Pi OS Bookworm:
 
@@ -28,6 +28,10 @@ import threading
 import time
 from pathlib import Path
 from typing import Optional
+
+_REPO_ROOT = Path(__file__).resolve().parents[1]
+if str(_REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(_REPO_ROOT))
 
 from shared.protocol import format_motor_line, parse_sensor_line
 
@@ -188,10 +192,19 @@ class SerialBridge:
 
 
 class CameraSource:
-    def __init__(self, width: int = 640, height: int = 480, fps: int = 15) -> None:
+    def __init__(
+        self,
+        width: int = 640,
+        height: int = 480,
+        fps: int = 15,
+        camera_index: int = 0,
+        usb: bool = False,
+    ) -> None:
         self.width = width
         self.height = height
         self.fps = fps
+        self.camera_index = camera_index
+        self.usb = usb
         self.last_jpeg: Optional[bytes] = None
         self.measured_fps = 0.0
         self._stop = threading.Event()
@@ -223,35 +236,37 @@ class CameraSource:
             time.sleep(max(0.0, period - dt))
 
     def _open(self):
-        try:
-            from picamera2 import Picamera2  # type: ignore
-            from picamera2.encoders import JpegEncoder  # noqa: F401
-            import io
+        if not self.usb:
+            try:
+                from picamera2 import Picamera2  # type: ignore
+                from picamera2.encoders import JpegEncoder  # noqa: F401
 
-            cam = Picamera2()
-            cfg = cam.create_preview_configuration(
-                main={"size": (self.width, self.height), "format": "RGB888"}
-            )
-            cam.configure(cfg)
-            cam.start()
-            print("Camera: picamera2")
+                cam = Picamera2()
+                cfg = cam.create_preview_configuration(
+                    main={"size": (self.width, self.height), "format": "RGB888"}
+                )
+                cam.configure(cfg)
+                cam.start()
+                print("Camera: picamera2")
 
-            def grab() -> Optional[bytes]:
-                arr = cam.capture_array()
-                return _rgb_to_jpeg(arr)
+                def grab() -> Optional[bytes]:
+                    arr = cam.capture_array()
+                    return _rgb_to_jpeg(arr)
 
-            return grab
-        except Exception as exc:
-            print(f"picamera2 unavailable ({exc}); trying OpenCV / placeholder")
+                return grab
+            except Exception as exc:
+                print(f"picamera2 unavailable ({exc}); trying OpenCV / placeholder")
+        else:
+            print(f"USB camera requested; OpenCV VideoCapture({self.camera_index})")
 
         try:
             import cv2
 
-            cap = cv2.VideoCapture(0)
+            cap = cv2.VideoCapture(self.camera_index)
             cap.set(cv2.CAP_PROP_FRAME_WIDTH, self.width)
             cap.set(cv2.CAP_PROP_FRAME_HEIGHT, self.height)
             if cap.isOpened():
-                print("Camera: OpenCV VideoCapture(0)")
+                print(f"Camera: OpenCV VideoCapture({self.camera_index})")
 
                 def grab() -> Optional[bytes]:
                     ok, frame = cap.read()
@@ -321,7 +336,13 @@ def pack_jpeg_message(jpeg: bytes) -> bytes:
 async def run_agent(args: argparse.Namespace) -> None:
     port = detect_serial_port(args.serial)
     bridge = SerialBridge(port, args.baud)
-    camera = CameraSource(args.width, args.height, args.fps)
+    camera = CameraSource(
+        args.width,
+        args.height,
+        args.fps,
+        camera_index=args.camera_index,
+        usb=args.usb_camera,
+    )
     bridge.start()
     camera.start()
 
@@ -409,6 +430,17 @@ def parse_args(argv: Optional[list[str]] = None) -> argparse.Namespace:
     p.add_argument("--height", type=int, default=480)
     p.add_argument("--fps", type=int, default=12)
     p.add_argument("--telem-hz", type=float, default=20.0)
+    p.add_argument(
+        "--usb-camera",
+        action="store_true",
+        help="Skip picamera2 and use a USB webcam via OpenCV",
+    )
+    p.add_argument(
+        "--camera-index",
+        type=int,
+        default=int(os.environ.get("CAMERA_INDEX", "0")),
+        help="OpenCV device index (0 = first camera, 1 = second, …)",
+    )
     return p.parse_args(argv)
 
 
@@ -421,8 +453,4 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    # Allow `python pi/robot_agent.py` from repo root or from pi/
-    repo = Path(__file__).resolve().parents[1]
-    if str(repo) not in sys.path:
-        sys.path.insert(0, str(repo))
     main()
