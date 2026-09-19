@@ -1,7 +1,7 @@
 /*
   Fly Brain Robot — Arduino Uno / Nano firmware
 
-  Sequential HC-SR04 (front/left/right) + L293D differential drive.
+  Sequential HC-SR05 (left / center / right) + L298N/L298D differential drive.
   USB serial 115200 to Raspberry Pi.
 
   Protocol:
@@ -11,21 +11,23 @@
   If no M command for WATCHDOG_MS, motors stop.
 
   Pinout: see docs/WIRING.md
+  ENA/ENB on the driver must be jumpered to 5 V (always enabled).
+  Speed is PWM on IN2 (D5) and IN3 (D6).
 */
 
-const int TRIG_FRONT = 2;
-const int ECHO_FRONT = 3;
-const int TRIG_LEFT = 4;
-const int ECHO_LEFT = 5;
-const int TRIG_RIGHT = 6;
-const int ECHO_RIGHT = 11;
+// HC-SR05
+const int TRIG_LEFT = 13;
+const int ECHO_LEFT = 12;
+const int TRIG_FRONT = 11;  // center
+const int ECHO_FRONT = 10;
+const int TRIG_RIGHT = 9;
+const int ECHO_RIGHT = 8;
 
-const int ENA = 9;   // L293D EN1, left PWM
-const int IN1 = 8;   // L293D IN1
-const int IN2 = 7;   // L293D IN2
-const int ENB = 10;  // L293D EN2, right PWM
-const int IN3 = 12;  // L293D IN3
-const int IN4 = 13;  // L293D IN4
+// L298N / L298D — IN pins only (ENA/ENB jumpered HIGH on the module)
+const int IN1 = 4;  // left
+const int IN2 = 5;  // left (PWM)
+const int IN3 = 6;  // right (PWM)
+const int IN4 = 7;  // right
 
 const unsigned long PING_TIMEOUT_US = 20000UL;  // ~340 cm max; miss -> -1
 const unsigned long WATCHDOG_MS = 200;
@@ -55,10 +57,8 @@ void setup() {
   digitalWrite(TRIG_LEFT, LOW);
   digitalWrite(TRIG_RIGHT, LOW);
 
-  pinMode(ENA, OUTPUT);
   pinMode(IN1, OUTPUT);
   pinMode(IN2, OUTPUT);
-  pinMode(ENB, OUTPUT);
   pinMode(IN3, OUTPUT);
   pinMode(IN4, OUTPUT);
 
@@ -85,25 +85,32 @@ int clampPwm(long v) {
   return (int)v;
 }
 
-void setOneMotor(int pwm, int inA, int inB, int en) {
+void writeIn(int pin, int mag, bool pwmCapable) {
+  if (pwmCapable) {
+    analogWrite(pin, mag);
+  } else {
+    digitalWrite(pin, mag > 0 ? HIGH : LOW);
+  }
+}
+
+void setOneMotor(int pwm, int inA, int inB, bool aPwm, bool bPwm) {
   int mag = pwm < 0 ? -pwm : pwm;
   if (mag > 255) mag = 255;
   if (pwm > 0) {
-    digitalWrite(inA, HIGH);
-    digitalWrite(inB, LOW);
+    writeIn(inA, mag, aPwm);
+    writeIn(inB, 0, bPwm);
   } else if (pwm < 0) {
-    digitalWrite(inA, LOW);
-    digitalWrite(inB, HIGH);
+    writeIn(inA, 0, aPwm);
+    writeIn(inB, mag, bPwm);
   } else {
-    digitalWrite(inA, LOW);
-    digitalWrite(inB, LOW);
+    writeIn(inA, 0, aPwm);
+    writeIn(inB, 0, bPwm);
   }
-  analogWrite(en, mag);
 }
 
 void applyMotors() {
-  setOneMotor(leftPwm, IN1, IN2, ENA);
-  setOneMotor(rightPwm, IN3, IN4, ENB);
+  setOneMotor(leftPwm, IN1, IN2, false, true);
+  setOneMotor(rightPwm, IN3, IN4, true, false);
 }
 
 void stopMotors() {

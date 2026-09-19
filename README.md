@@ -18,8 +18,8 @@ real `male-cns:v1.0` subset (AL(R), ~4057 neurons). After that file exists,
 
 ## 1. Wire the robot
 
-Follow **[docs/WIRING.md](docs/WIRING.md)** for the **L293D** pinout on this acrylic 2WD chassis
-(4×AA pack → L293D motor power, Arduino → L293D logic, Pi USB → Arduino only).
+Follow **[docs/WIRING.md](docs/WIRING.md)** for the **L298N/L298D** pinout on this acrylic 2WD chassis
+(4×AA pack → driver motor power, Arduino → IN1–IN4, Pi USB → Arduino only).
 
 Flash [`firmware/arduino_robot/arduino_robot.ino`](firmware/arduino_robot/arduino_robot.ino)
 with Arduino IDE. Serial monitor at 115200 should print `S,<front>,<left>,<right>`.
