@@ -1,0 +1,20 @@
+name: fly-brain
+
+services:
+  brain:
+    build: .
+    image: fly-brain:local
+    ports:
+      - "8000:8000"
+    restart: unless-stopped
+
+  # Optional fake robot (closed loop, no hardware):
+  #   docker compose --profile sim up --build
+  sim:
+    profiles: ["sim"]
+    image: fly-brain:local
+    depends_on:
+      brain:
+        condition: service_healthy
+    command: ["python", "-m", "mac.sim_robot", "--host", "brain", "--scenario", "front"]
+    restart: unless-stopped

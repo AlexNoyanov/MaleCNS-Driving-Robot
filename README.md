@@ -29,7 +29,32 @@ Flash [`firmware/arduino_robot/arduino_robot.ino`](firmware/arduino_robot/arduin
 with Arduino IDE. Serial monitor at 115200 should print `S,<front>,<left>,<right>`.
 Type `M,180,180` (from the Pi later) to spin both wheels forward — **jack the wheels up first**.
 
-## 2. Mac brain + dashboard (Python 3.10+)
+## 2. Brain + dashboard
+
+### Docker (any Mac / Linux)
+
+Needs [Docker Desktop](https://www.docker.com/products/docker-desktop/) or Engine.
+The image is the idle CNS demo (and the brain the Pi talks to). No neuPrint token.
+
+```bash
+cd Brain-AI
+docker compose up --build
+```
+
+Open http://127.0.0.1:8000 — 3D fly CNS, spike raster, approaching-wall idle demo.
+
+From another machine on the LAN, use `http://<this-host-ip>:8000`. Point the Pi at
+that same IP (`MAC_HOST` in `scripts/deploy-pi.env`, then `./scripts/deploy-pi.sh`).
+
+Fake closed loop (no hardware):
+
+```bash
+docker compose --profile sim up --build
+```
+
+Stop with Ctrl-C, or `docker compose down`.
+
+### Local venv (Python 3.10+)
 
 ```bash
 cd Brain-AI
@@ -39,8 +64,7 @@ pip install -r requirements-mac.txt
 python -m mac.server
 ```
 
-Open http://127.0.0.1:8000 — you should see the 3D fly CNS, spike raster, and
-an idle approaching-wall demo (no robot yet).
+Open http://127.0.0.1:8000 — same dashboard as Docker, no container.
 
 Optional richer 3D (one-time, needs `NEUPRINT_TOKEN`):
 
